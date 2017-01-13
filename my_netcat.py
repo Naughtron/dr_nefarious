@@ -99,5 +99,31 @@ def client_sender(buffer):
         # if that is cool then it is shipped off to the target
         if len(buffer):
             client.send(buffer)
+    
+            while True:
+                # wait for the data to come back 
+                recv_len = 1
+                response = ""
+                
+                while recv_len:
+                    data = client.recv(1024)
+                    recv_len = len(data)
+                    response = data
+                    
+                    if recv_len < 1024:
+                        break
+                print response
+                
+                # wait for more input
+                buffer = raw_input("")
+                buffer += "\n"
+                
+                # send it off
+                client.send(buffer)
+    
+except:
+    print "[*] Exception Exiting"
+    # kill the connection 
+    client.close()
             
         

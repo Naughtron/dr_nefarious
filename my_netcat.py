@@ -121,9 +121,40 @@ def client_sender(buffer):
                 # send it off
                 client.send(buffer)
     
-except:
-    print "[*] Exception Exiting"
-    # kill the connection 
-    client.close()
+    except:
+        print "[*] Exception Exiting"
+        # kill the connection 
+        client.close()
             
+def server_loop():
+    global target
+    
+    # if no target is defined by the user then listen on all interfaces
+    if not len(target):
+        target = "0.0.0.0"
+    
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # bind to what the user has entered 
+    server.bind((target, port))
+    # setting listen to 1 connection for now
+    server.listen(1)
+    
+    while True: 
+        client_socket, addr = server.accept()
+        # create new thread for the client
+        client_thread = threading.Thread(target=client_handler, args=(client_socket,))
+        client_thread.start()
         
+        
+def run_command():
+    # trim
+    command = command.rstrip()
+    
+    # run the command and get the output
+    try:
+        output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
+    except:
+        output = "Failed to run your command. \r\n"
+        
+    # send the output back to the user
+    return output

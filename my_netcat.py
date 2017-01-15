@@ -16,8 +16,8 @@ upload_destination  = ""
 port                = 0
 
 # usage info 
-def useage():
-    print "***Naughtron Net Tools***"
+def usage():
+    print "***!N Net Tools***"
     print
     print "Usage: my_netcat.py -t target_host -p port"
     print
@@ -33,61 +33,6 @@ def useage():
     print "echo 'ALWAYS BE TESTING!' | ./my_netcat.py -t 64.30.228.82 -p 131"
     sys.exit(0)
     
-# main
-def main():
-    global listen
-    global port
-    global execute
-    global command
-    global upload_destination
-    global target
-    
-    if not len(sys.argv[1:]):
-        useage()
-        
-    # read command line options 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:", ["help", 
-                                                                 "listen", 
-                                                                 "execute", 
-                                                                 "target", 
-                                                                 "port", 
-                                                                 "command", 
-                                                                 "upload"])
-    except getopt.GetoptError as err:
-        print str(err)
-        useage()
-        
-    
-    for a, o in opts:
-        if o in ("-h", "--help"):
-            useage()
-        elif o in ("-l", "--listen"):
-            execute = a
-        elif o in ("-c", "--commandshell"):
-            command = True
-        elif o in ("-u", "--upload"):
-            upload_destination = a
-        elif o in ("-t", "--target"):
-            target = a
-        elif o in ("-p", "--port"):
-            port = int(a)
-            
-    # listen or send data?
-    if not listen and len(target) and port > 0:
-        # read the buffer from command line 
-        # NOTE: you need to send CRTL-D if not sending input
-        buffer = sys.stdin.read()
-        # send data
-        client_sender(buffer)
-    
-    if listen: 
-        # listen here, and wait to see if the user wants to 
-        # upload, execute, drop files, depending on above.
-        server_loop()
-        
-main()
-
 def client_sender(buffer):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
@@ -106,11 +51,11 @@ def client_sender(buffer):
                 response = ""
                 
                 while recv_len:
-                    data = client.recv(1024)
+                    data = client.recv(4096)
                     recv_len = len(data)
-                    response = data
+                    response += data
                     
-                    if recv_len < 1024:
+                    if recv_len < 4096:
                         break
                 print response
                 
@@ -137,14 +82,13 @@ def server_loop():
     # bind to what the user has entered 
     server.bind((target, port))
     # setting listen to 1 connection for now
-    server.listen(1)
+    server.listen(5)
     
     while True: 
         client_socket, addr = server.accept()
         # create new thread for the client
         client_thread = threading.Thread(target=client_handler, args=(client_socket,))
         client_thread.start()
-        
         
 def run_command():
     # trim
@@ -209,5 +153,60 @@ def client_handler(client_socket):
             response = run_command(cmd_buffer)
             
             # send back the response
-            client_socket.send(response)
+            client_socket.send()
+    
+# main
+def main():
+    global listen
+    global port
+    global execute
+    global command
+    global upload_destination
+    global target
+    
+    if not len(sys.argv[1:]):
+        usage()
         
+    # read command line options 
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu:", ["help", 
+                                                                 "listen", 
+                                                                 "execute", 
+                                                                 "target", 
+                                                                 "port", 
+                                                                 "command", 
+                                                                 "upload"])
+    except getopt.GetoptError as err:
+        print str(err)
+        usage()
+        
+    
+    for a, o in opts:
+        if o in ("-h", "--help"):
+            useage()
+        elif o in ("-l", "--listen"):
+            execute = a
+        elif o in ("-c", "--commandshell"):
+            command = True
+        elif o in ("-u", "--upload"):
+            upload_destination = a
+        elif o in ("-t", "--target"):
+            target = a
+        elif o in ("-p", "--port"):
+            port = int(a)
+            
+    # listen or send data?
+    if not listen and len(target) and port > 0:
+        # read the buffer from command line 
+        # NOTE: you need to send CRTL-D if not sending input
+        buffer = sys.stdin.read()
+        # send data
+        client_sender(buffer)
+    
+    if listen: 
+        # listen here, and wait to see if the user wants to 
+        # upload, execute, drop files, depending on above.
+        server_loop()
+        
+if __name__ == '__main__':
+    main()

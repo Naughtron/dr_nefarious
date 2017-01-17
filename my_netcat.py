@@ -79,7 +79,7 @@ def client_handler(client_socket):
                 
                 while True:
                         # show a simple prompt
-                        client_socket.send("<BHP:#> ")
+                        client_socket.send("<!N:#> ")
                         
                         # now we receive until we see a linefeed (enter key)
                         cmd_buffer = ""
@@ -239,3 +239,26 @@ def main():
                 server_loop()
 
 main()    
+
+'''
+Usage Examples: 
+0: 
+Run as Server
+python my_netcat.py -l -p 9999 -c
+Run as Client
+python my_netcat.py -t localhost -p 9999
+1:
+simple 'ls -l' or 'pwd'
+you will get back a list of siles as if you were ssh'ed into the box
+2: 
+send a Request:
+
+echo -ne "GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n" | python my_netcat.py -t www.google.com -p 80
+
+HTTP/1.0 400 Bad Request
+Content-Type: text/html; charset=UTF-8
+Content-Length: 1555
+Date: Tue, 17 Jan 2017 01:59:07 GMT
+
+
+'''

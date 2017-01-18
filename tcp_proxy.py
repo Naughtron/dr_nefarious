@@ -41,6 +41,67 @@ def server_loop(local_host, local_port, remote_host, remote_port, recv_first):
     # start the thread
     proxy_thread.start()
 
+    # proxy_handler 
+    def proxy_handler(client_socket, remote_host, remote_port, recv_first):
+        # create connection socket
+        remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # connect over the socket 
+        remote_socket.connect((remote_host, remote_port))
+
+        #recv data from the remote end if set
+        if recv_first:
+
+            remote_buffer = recv_from(remote_socket)
+            hexdump(remote_buffer) # wat? clear this up so you understand 
+
+            # send data to the response handler
+            remote_buffer = response_handler(remote_buffer)
+
+        # if there is data to send to the local machine
+        if len(remote_buffer):
+            print "[<==] Sending %d bytes to localhost " % len(remote_buffer)
+            client_socket.send(remote_buffer)
+
+        # now loop and rad from local
+        # send to remote / send to local
+        while True: 
+
+            # read from the local
+            local_buffer = recv_from(client_socket)
+
+            if len(local_buffer):
+                print "[==>] Recv'd %d bytes from localhost " % len(local_buffer)
+                hexdump(local_buffer) # again wat? Clear this up so you understand
+
+                # send data to request handler
+                local_buffer = request_handler(local_buffer)
+
+                # send off the data to the remote host
+                remote_socket.send(local_buffer)
+                print "[==>] Data sent to the remote"
+
+                # recv back a resposne
+                remote_buffer = recv_from(remote_socket)
+
+                if len(remote_buffer):
+
+                    print "[<==] Recv'd %d bytes from remote. " % len(remote_buffer)
+                    hexdump(remote_buffer)
+
+                    # send response handler over local socket
+                    client_socket.send(remote_buffer)
+                    print "[<==] Sent to localhost."
+
+                # if there is no more data to transmit close the connections 
+                if not len(local_buffer) or not len(remote_buffer):
+                    client_socket.close()
+                    remote_socket.close()
+                    print "[*] There is no more data to transmit. Closing Connections."
+
+                    # break out
+                    break
+
+
     def main():
 
         # show usage example
@@ -68,6 +129,7 @@ def server_loop(local_host, local_port, remote_host, remote_port, recv_first):
             recv_first = False
 
         # now create a listening socket
+        # call server_loop with the following: 
         server_loop(local_host, local_port, remote_host, remote_port, recv_first)
 
 main()

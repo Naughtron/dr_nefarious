@@ -252,9 +252,20 @@ simple 'ls -l' or 'pwd'
 you will get back a list of siles as if you were ssh'ed into the box
 2: 
 send a Request:
+<<<<<<< HEAD
 echo -ne "GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n" | python my_netcat.py -t www.google.com -p 80
+=======
+
+echo -ne "GET / HTTP/1.1\r\nHost: www.google.com\r\n\r\n" | python my_netcat.py -t www.google.com -p 80
+
+>>>>>>> 0cee42acd50af5cde8152e2fff103cd99adb00b8
 HTTP/1.0 400 Bad Request
 Content-Type: text/html; charset=UTF-8
 Content-Length: 1555
 Date: Tue, 17 Jan 2017 01:59:07 GMT
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 0cee42acd50af5cde8152e2fff103cd99adb00b8
 '''

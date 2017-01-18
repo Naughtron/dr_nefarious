@@ -7,7 +7,7 @@ import threading
 import subprocess
 
 
-# define some global variables
+# define some global var
 listen             = False
 command            = False
 upload             = False

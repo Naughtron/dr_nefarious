@@ -132,8 +132,8 @@ def receive_from(connection):
                 if not data:
                     break
                 buffer += data
-        except:
-            pass
+    except:
+        pass
 
         return buffer
 

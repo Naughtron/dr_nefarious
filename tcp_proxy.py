@@ -1,6 +1,18 @@
 #!/opt/local/bin/python2.7
 # TCP Proxy example
 
+"""
+example use / quick test: 
+on a linux box run the following: 
+python tcp_proxy.py 127.0.0.1 21 ftp.target.ca 21 True
+
+in a new terminal run: 
+ftp 127.0.0.1
+
+you will then see data recv'ed
+[*] Listening on 127.0.0.1:21
+[==>] Recv incoming connection 127.0.0.1:39560
+"""
 
 import sys
 import socket
